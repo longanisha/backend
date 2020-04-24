@@ -1,0 +1,17 @@
+.btnStyle {
+    background-color: #7F43C9;
+    color: white;
+    border-radius: 5px;
+    border: 1px solid #7F43C9;
+}
+.topDistant {
+    /* margin-top: 20px; */
+    margin: 20px 0 0 0;
+}
+.inputSize .el-input__inner {
+    width: 200px;
+}
+.formFormat {
+    width: 80%;
+    margin: 0 auto;
+  }
