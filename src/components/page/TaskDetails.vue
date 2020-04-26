@@ -5,25 +5,27 @@
 
       <el-table-column prop="AllCount" label="所有数量"></el-table-column>
       <el-table-column prop="CrateTime" label="创建时间"></el-table-column>
+
       <el-table-column label="结束时间">
         <template
           slot-scope="scope"
         >{{scope.row.EndTime=="0001-01-01T00:00:00Z"? "null":scope.row.EndTime}}</template>
       </el-table-column>
+      <el-table-column prop="UpdateTime" label="更新时间"></el-table-column>
+
       <el-table-column prop="NowCount" label="现在数量"></el-table-column>
 
       <el-table-column prop="Status" label="状态">
         <template slot-scope="scope">
           <div class="dots" :style="{'backgroundColor':dotColor}"></div>
-        
         </template>
       </el-table-column>
-      <el-table-column prop="UpdateTime" label="更新时间"></el-table-column>
     </el-table>
 
     <div class="gap"></div>
     <div class="taskListTitl">
       <h2>任务列表</h2>
+    
     </div>
 
     <el-table :data="websiteStateInfo" style="width: 100%">
@@ -37,6 +39,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="AllCount" label="所有数量"></el-table-column>
+      <el-table-column prop="NowCount" label="现在数量"></el-table-column>
 
       <el-table-column prop="CrateTime" label="创建时间"></el-table-column>
       <el-table-column label="结束时间">
@@ -44,22 +47,24 @@
           slot-scope="scope"
         >{{scope.row.EndTime=="0001-01-01T00:00:00Z"? "null":scope.row.EndTime}}</template>
       </el-table-column>
-      <el-table-column prop="ErrCode" label="错误码"></el-table-column>
+      <!-- <el-table-column prop="ErrCode" label="错误码"></el-table-column> -->
       <el-table-column prop="ErrMsg" label="错误信息"></el-table-column>
       <el-table-column prop="FailedCount" label="失败账号"></el-table-column>
-      <el-table-column prop="NowCount" label="现在数量"></el-table-column>
 
-      
+      <el-table-column prop="SuccessCount" label="成功账号"></el-table-column>
       <el-table-column prop="Status" label="状态">
         <template slot-scope="scope">
-         
-             <div class="dots" :style="{'backgroundColor':scope.row.Status}"></div>
-            <!-- <li class="dotStatus" :style="{'backgroundColor':scope.row.status}"></li> -->
-       
+          <div class="dots" :style="{'backgroundColor':scope.row.Status}"></div>
+          <!-- <li class="dotStatus" :style="{'backgroundColor':scope.row.status}"></li> -->
         </template>
       </el-table-column>
-      <el-table-column prop="SuccessCount" label="成功账号"></el-table-column>
       <el-table-column label="操作">
+         <template slot="header" slot-scope="scope">
+         
+
+         <el-button type="danger" size="mini" @change="stopAllTask">全部停止</el-button>
+       
+        </template>
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -74,13 +79,21 @@
     </el-table>
 
     <el-dialog title="	状态列表" :visible.sync="dialogTableVisible" width="80%">
-      <p>过期时间：{{taskList.ExpirationTime}}</p>
-      <p>最后接收数据时间：{{taskList.LastTime}}</p>
-      <el-table :data="postList">
+      <p class="pStyle">
+        过期时间：
+        <span class="fontEm">{{taskList.ExpirationTime}}</span>
+      </p>
+      <p class="pStyle">
+        最后接收数据时间：
+        <span class="fontEm">{{taskList.LastTime}}</span>
+      </p>
+      <el-table :data="postList" height="500">
         <el-table-column prop="all_count" label="所有数量"></el-table-column>
         <el-table-column prop="err_code" label="错误码"></el-table-column>
         <el-table-column prop="err_msg" label="错误信息"></el-table-column>
         <el-table-column prop="failed_count" label="失败数量"></el-table-column>
+        <el-table-column prop="success_count" label="成功数量"></el-table-column>
+
         <el-table-column prop="now_count" label="	正在进行任务数量"></el-table-column>
 
         <el-table-column label="状态">
@@ -88,7 +101,6 @@
             <div class="dots" :style="{'backgroundColor':scope.row.status}"></div>
           </template>
         </el-table-column>
-        <el-table-column prop="success_count" label="成功数量"></el-table-column>
         <!-- <el-table-column prop="uuid" la
         bel="Uuid"></el-table-column>-->
       </el-table>
@@ -113,6 +125,9 @@ export default {
     };
   },
   methods: {
+    // 停止所有任务
+stopAllTask(){},
+
     getAllwebsiteState(index, row) {
       var params = row.Id;
       this.dialogTableVisible = true;
@@ -124,28 +139,34 @@ export default {
           this.Uuid = res.data.Uuid;
         });
       this.$axios
-        // .get("http://192.168.31.234:8080/v2/start/first_uuid/" + this.Uuid)
-        .get(
-          "http://192.168.31.234:8080/v2/start/first_uuid/ac8fc86e-f970-46fd-88e1-cb5e4e3338b9"
-        )
+        .get("http://192.168.31.234:8080/v2/start/first_uuid/" + this.Uuid)
+        // .get(
+        //   "http://192.168.31.234:8080/v2/start/first_uuid/ac8fc86e-f970-46fd-88e1-cb5e4e3338b9"
+        // )
         .then(res => {
-          // this.taskList = res.data;
+          this.taskList = res.data;
+          console.log(this.taskList);
+
+          var LastTime = this.taskList.LastTime;
+LastTime =  LastTime.replace("T", " ")
+          LastTime = LastTime.substring(0, LastTime.indexOf("+"));
+          console.log(LastTime);
+          this.taskList.LastTime = LastTime;
+
           this.postList = res.data.PostList;
           console.log(res.data.PostList);
-          this.postList.map(item=>{
+          this.postList.map(item => {
             switch (item.status) {
-          case "1":
-            item.status = "#2EFFFC";
-            break;
-          case "2":
-            item.status = "#FEB880";
-            break;
-          case "3":
-            item.status = "#FEB880";
-        }
-          })
-       
-          
+              case "1":
+                item.status = "#2EFFFC";
+                break;
+              case "2":
+                item.status = "#FEB880";
+                break;
+              case "3":
+                item.status = "#FEB880";
+            }
+          });
         });
     },
     handleStop(index, row) {
@@ -172,19 +193,24 @@ export default {
       .then(res => {
         console.log(res);
         this.taskDetail.push(res.data);
-  this.taskDetail.map(item => {
-        console.log(item.UpdateTime);
-        
-        var UpdateTime =  item.UpdateTime
-        var CrateTime =  item.CrateTime
+        this.taskDetail.map(item => {
+          console.log(item.UpdateTime);
 
-       item.UpdateTime = CrateTime.substring(0, UpdateTime.indexOf("+"));
-       item.CrateTime =  UpdateTime.substring(0,  CrateTime.indexOf("+"));
-      
-      });
+          var UpdateTime = item.UpdateTime;
+          var CrateTime = item.CrateTime;
+          var EndTime = item.EndTime;
+     item.EndTime = EndTime.replace("T", " ");
+        // item.UpdateTime = UpdateTime.replace("T", " ");
+        item.CrateTime = CrateTime.replace("T", " ");
+        item.UpdateTime = UpdateTime.replace("T", " ");
 
-
-
+          // item.UpdateTime = CrateTime.substring(0, UpdateTime.indexOf("+"));
+          // item.CrateTime = UpdateTime.substring(0, CrateTime.indexOf("+"));
+          // item.EndTime = EndTime.substring(0, EndTime.indexOf("+"));
+           item.UpdateTime = item.UpdateTime.substring(0, item.UpdateTime.indexOf("+"));
+           item.EndTime = item.EndTime.substring(0, item.EndTime.indexOf("+"));
+          item.CrateTime = item.CrateTime.substring(0, item.CrateTime.indexOf("+"));
+        });
 
         this.dotStatus = this.taskDetail[0].Status;
         console.log(this.taskDetail[0].Status);
@@ -206,36 +232,53 @@ export default {
           params
       )
       .then(res => {
-      
-        this.websiteStateInfo.push(res.data.data[0]);
-        var dotStatus = res.data.data[0].Status
-
-  console.log(this.websiteStateInfo);
-
-
-  this.websiteStateInfo.map(item => {
-        console.log(item.CrateTime);
+        console.log(res.data);
         
-        var EndTime =  item.EndTime
-        var CrateTime =  item.CrateTime
+        this.websiteStateInfo= res.data.data
+        var dotStatus = res.data.data[0].Status;
 
-       item.EndTime = EndTime.substring(0, EndTime.indexOf("+"));
-       item.CrateTime =  CrateTime.substring(0,  CrateTime.indexOf("+"));
-      
-      });
+        // console.log(this.websiteStateInfo);
 
-
+        this.websiteStateInfo.map(item => {
         
-        switch (dotStatus) {
-          case "1":
-            res.data.data[0].Status = "#2EFFFC";
-            break;
-          case "2":
-           res.data.data[0].Status = "#FEB880";
-            break;
-          case "3":
-            res.data.data[0].Status = "#FEB87F";
-        }
+switch (item.Status) {
+              case "1":
+                item.Status = "#2EFFFC";
+                break;
+              case "2":
+                item.Status = "#FEB880";
+                break;
+              case "3":
+                item.Status = "#FEB880";
+            }
+          var EndTime = item.EndTime;
+          var CrateTime = item.CrateTime;
+          // var UpdateTime = item.UpdateTime;
+
+
+  // console.log(CrateTime);
+        item.EndTime = EndTime.replace("T", " ");
+        // item.UpdateTime = UpdateTime.replace("T", " ");
+        item.CrateTime = CrateTime.replace("T", " ");
+  // console.log(item.CrateTime);
+
+          item.EndTime = item.EndTime.substring(0, item.EndTime.indexOf("+"));
+          item.CrateTime = item.CrateTime.substring(0, item.CrateTime.indexOf("+"));
+          // item.CrateTime = CrateTime.substring(0, CrateTime.indexOf("+"));
+  console.log(item.CrateTime);
+
+        });
+
+        // switch (dotStatus) {
+        //   case "1":
+        //     res.data.data[0].Status = "#2EFFFC";
+        //     break;
+        //   case "2":
+        //     res.data.data[0].Status = "#FEB880";
+        //     break;
+        //   case "3":
+        //     res.data.data[0].Status = "#FEB87F";
+        // }
       });
     // this.$api.getWebsiteStateInfo().then(res => {
     //   console.log(res.data);
@@ -251,6 +294,8 @@ export default {
 }
 .taskListTitl {
   /* margin: 50px 0; */
+  display: flex;
+  justify-content: space-around;
   padding: 0 0 20px 0;
   text-align: center;
   border-bottom: 1px solid #606266;

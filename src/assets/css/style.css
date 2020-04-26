@@ -15,3 +15,25 @@
     width: 80%;
     margin: 0 auto;
   }
+  .pStyle {
+    margin-bottom: 15px
+  }
+  .fontEm {
+    color:#FE3BBB
+
+  }
+  .inputSeletion {
+      width: 100%;
+  }
+  .emailTitle {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid lightgrey;
+      border-radius: 6px;
+  }
+  .collapseWords {
+    text-overflow:ellipsis
+  }

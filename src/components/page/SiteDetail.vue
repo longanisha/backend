@@ -10,7 +10,7 @@
     >
       <el-card class="box-card">
         <div slot="header" class="clearfix">
-          <h1>数据库配置</h1>
+          <h1>网站详情</h1>
           <div>
             <el-button
               type="primary"
@@ -20,7 +20,13 @@
               @click="showUserInfo"
             >查看用户</el-button>
             <!-- <el-button type="primary">获取文章</el-button> -->
-            <el-button type="primary" icon="el-icon-tickets" size="small" plain  @click="showArticalList">获取文章</el-button>
+            <el-button
+              type="primary"
+              icon="el-icon-tickets"
+              size="small"
+              plain
+              @click="showArticalList"
+            >获取文章</el-button>
           </div>
         </div>
 
@@ -32,22 +38,40 @@
             <el-input v-model="siteDetail.Url"></el-input>
           </el-form-item>
           <el-form-item label="是否可以注册" prop="Register">
-            <el-input v-model="siteDetail.Register"></el-input>
+             <el-select v-model="siteDetail.Register" placeholder="请选择" class="inputSeletion">
+              <el-option label="是" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="是否可以发送文章" prop="Article">
-            <el-input v-model="siteDetail.Article"></el-input>
+             <el-select v-model="siteDetail.Article" placeholder="请选择" class="inputSeletion">
+              <el-option label="是" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="是否需要翻墙" prop="Vnp">
-            <el-input v-model="siteDetail.Vnp"></el-input>
+           <el-select v-model="siteDetail.Vnp" placeholder="请选择" class="inputSeletion">
+              <el-option label="是" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="是否需要邮箱验证" prop="EmailVerify">
-            <el-input v-model="siteDetail.EmailVerify"></el-input>
+             <el-select v-model="siteDetail.EmailVerify" placeholder="请选择" class="inputSeletion">
+              <el-option label="是" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="是否需要谷歌验证" prop="GoogleVerify">
-            <el-input v-model="siteDetail.GoogleVerify"></el-input>
+             <el-select v-model="siteDetail.GoogleVerify" placeholder="请选择" class="inputSeletion">
+              <el-option label="是" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="是否可以丢弃" prop="Disposable">
-            <el-input v-model="siteDetail.Disposable"></el-input>
+            <el-select v-model="siteDetail.Disposable" placeholder="请选择" class="inputSeletion">
+              <el-option label="是" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="说明" prop="SiteExplain">
             <el-input v-model="siteDetail.SiteExplain"></el-input>
@@ -59,7 +83,10 @@
             <el-input v-model="siteDetail.ChartName"></el-input>
           </el-form-item>
           <el-form-item label="是否可用" prop="Status">
-            <el-input v-model="siteDetail.Status"></el-input>
+              <el-select v-model="siteDetail.Status" placeholder="请选择" class="inputSeletion">
+              <el-option label="是" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+            </el-select>
           </el-form-item>
         </div>
       </el-card>
@@ -71,8 +98,10 @@
       </div>
     </el-form>
     <!--  用户信息弹窗 -->
-    <el-dialog title="用户列表" :visible.sync="dialogTableVisible" >
-      <el-table :data="userList"  height="450">
+    <el-dialog title="用户列表" :visible.sync="dialogTableVisible" width="80%">
+      <p class="pStyle">用户总数：<span  class="fontEm">{{articalListTitile}}</span></p>
+
+      <el-table :data="userList" height="700" >
         <el-table-column property="Id" label="Id" width="150"></el-table-column>
         <el-table-column property="Username" label="用户名"></el-table-column>
 
@@ -82,18 +111,19 @@
       </el-table>
     </el-dialog>
 
+    <!-- 文章列表弹窗 -->
+    <el-dialog title="文章列表" :visible.sync="dialogFormVisible" width="80%">
+      
+      <p class="pStyle">用户总数：<span class="fontEm">{{articalListTitile}}</span></p>
 
-<!-- 文章列表弹窗 -->
-   <el-dialog title="文章列表" :visible.sync="dialogFormVisible" >
-      <el-table :data="articalList"  height="450">
+      <el-table :data="articalList" height="700">
+        
         <el-table-column property="Id" label="Id" width="150"></el-table-column>
-        <el-table-column property="Keyword" label="文章"></el-table-column>
+        <el-table-column property="Keyword"  label="文章" style="collapseWords"></el-table-column>
 
         <el-table-column property="Url" label="地址" width="200"></el-table-column>
-     
       </el-table>
     </el-dialog>
-  
   </div>
 </template>
 
@@ -153,7 +183,8 @@ export default {
       userList: [],
       dialogTableVisible: false,
       dialogFormVisible:  false,
-      articalList: []
+      articalList: [],
+      articalListTitile: ""
     };
   },
 
@@ -176,7 +207,10 @@ export default {
         .get("http://192.168.31.234:8080/v2/article/user/1")
         .then(res => {
           console.log(res);
-          this.articalList = res.data.data;
+          this.articalListTitile = res.data.count
+          // console.log( this.articalListTitile);
+          
+          this.userList = res.data.data;
         });
         this.dialogTableVisible = true
     },
@@ -184,38 +218,40 @@ export default {
        this.$axios
         .get("http://192.168.31.234:8080/v2/article/article/1")
         .then(res => {
-          console.log(res);
+          // console.log(res);
+          this.articalListTitile = res.data.count
+
           this.articalList = res.data.data;
         });
         this.dialogFormVisible = true
     },
     open() {
-      this.$confirm("此操作将永久删除该网站, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      })
-        .then(() => {
-          // 暂未调用删除接口
-          // this.$axios.delete("http://192.168.31.234:8080/v2/website_use",{this.$route.params.id}).then(data=>console.log(data)
+       this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          // this.$axios.delete("http://192.168.31.234:8080/v2/website_use",this.$route.params.id).then(data=>console.log(data)
           // )
           this.$message({
-            type: "success",
-            message: "删除成功!"
+            type: 'success',
+            message: '删除成功!'
           });
-          this.$router.go(-1);
-        })
-        .catch(() => {
+            this.$router.go(-1);
+        }).catch(() => {
           this.$message({
-            type: "info",
-            message: "已取消删除"
-          });
+            type: 'info',
+            message: '已取消删除'
+          });          
         });
     },
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
-          alert("submit!");
+        this.$message({
+          message: '恭喜你，更新成功',
+          type: 'success'
+        });
           // console.log(this.siteDetail);
           this.$axios
             .put(
@@ -251,5 +287,4 @@ export default {
   align-items: center;
   padding: 0 30px;
 }
-
 </style>

@@ -29,7 +29,7 @@
             <el-input v-model="list.sql_user"></el-input>
           </el-form-item>
           <el-form-item label="延迟时间" prop="timeout">
-            <el-input v-model="list.timeout"></el-input>
+            <el-input v-model.number="list.timeout"></el-input>
           </el-form-item>
         </div>
       </el-card>
@@ -60,10 +60,10 @@
 
          <div class="formFormat">
  <el-form-item label="等待email发送间隔" prop="email_interval_time">
-          <el-input v-model="list.email_interval_time"></el-input>
+          <el-input v-model.number="list.email_interval_time"></el-input>
         </el-form-item>
         <el-form-item label="等待email发送时间" prop="email_time">
-          <el-input v-model="list.email_time"></el-input>
+          <el-input v-model.number="list.email_time"></el-input>
         </el-form-item>
         <el-form-item label="最多连续错误次数" prop="err_count">
           <el-input v-model.number="list.err_count"></el-input>
@@ -72,18 +72,20 @@
           <el-input v-model.number="list.proxy_err_count"></el-input>
         </el-form-item>
         <el-form-item label="发送状态间隔秒数" prop="send_status">
-          <el-input v-model="list.send_status"></el-input>
+          <el-input v-model.number="list.send_status"></el-input>
         </el-form-item>
         <el-form-item label="数量不可达到cpu百分比" prop="cpu_max">
-          <el-input v-model="list.cpu_max"></el-input>
+          <el-input v-model.number="list.cpu_max"></el-input>
         </el-form-item>
         <el-form-item label="数量不可达到内存百分比" prop="ram_max">
-          <el-input v-model="list.ram_max"></el-input>
+          <el-input v-model.number="list.ram_max"></el-input>
         </el-form-item>
         <el-form-item label="线程数量" prop="thread_count" type="number">
           <el-input v-model.number="list.thread_count"></el-input>
         </el-form-item>
-
+ <el-form-item label="验证连续错误MAX" prop="verify_err_count" type="number">
+          <el-input v-model.number="list.verify_err_count"></el-input>
+        </el-form-item>
          </div>
        
       </el-card>
@@ -167,6 +169,9 @@ export default {
         cpu_max: [{ required: true, validator: checkEmptty, trigger: "blur" }],
         ram_max: [{ required: true, validator: checkEmptty, trigger: "blur" }],
         thread_count: [
+          { required: true, validator: checkEmptty, trigger: "blur" }
+        ],
+        verify_err_count: [
           { required: true, validator: checkEmptty, trigger: "blur" }
         ]
       }

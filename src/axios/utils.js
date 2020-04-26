@@ -25,3 +25,4 @@ export function GetServerBase() {
 export function GetEvn() {
   return process.env.NODE_ENV === 'production'
 }
+

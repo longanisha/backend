@@ -17,22 +17,46 @@
             <el-input v-model="siteDetail.Url"></el-input>
           </el-form-item>
           <el-form-item label="是否可以注册" prop="Register">
-            <el-input v-model="siteDetail.Register"></el-input>
+            <el-select v-model="siteDetail.Register" placeholder="请选择" class="inputSeletion">
+              <el-option label="是" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+            </el-select>
+            <!-- <el-input v-model="siteDetail.Register"></el-input> -->
           </el-form-item>
           <el-form-item label="是否可以发送文章" prop="Article">
-            <el-input v-model="siteDetail.Article"></el-input>
+            <el-select v-model="siteDetail.Article" placeholder="请选择" class="inputSeletion">
+              <el-option label="是" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+            </el-select>
+            <!-- <el-input v-model="siteDetail.Article"></el-input> -->
           </el-form-item>
           <el-form-item label="是否需要翻墙" prop="Vnp">
-            <el-input v-model="siteDetail.Vnp"></el-input>
+            <!-- <el-input v-model="siteDetail.Vnp"></el-input> -->
+            <el-select v-model="siteDetail.Vnp" placeholder="请选择" class="inputSeletion">
+              <el-option label="是" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="是否需要邮箱验证" prop="EmailVerify">
-            <el-input v-model="siteDetail.EmailVerify"></el-input>
+            <!-- <el-input v-model="siteDetail.EmailVerify"></el-input> -->
+            <el-select v-model="siteDetail.EmailVerify" placeholder="请选择" class="inputSeletion">
+              <el-option label="是" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="是否需要谷歌验证" prop="GoogleVerify">
-            <el-input v-model="siteDetail.GoogleVerify"></el-input>
+            <!-- <el-input v-model="siteDetail.GoogleVerify"></el-input> -->
+            <el-select v-model="siteDetail.GoogleVerify" placeholder="请选择" class="inputSeletion">
+              <el-option label="是" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="是否可以丢弃" prop="Disposable">
-            <el-input v-model="siteDetail.Disposable"></el-input>
+            <!-- <el-input v-model="siteDetail.Disposable"></el-input> -->
+            <el-select v-model="siteDetail.Disposable" placeholder="请选择" class="inputSeletion">
+              <el-option label="是" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="说明" prop="SiteExplain">
             <el-input v-model="siteDetail.SiteExplain"></el-input>
@@ -44,7 +68,11 @@
             <el-input v-model="siteDetail.ChartName"></el-input>
           </el-form-item>
           <el-form-item label="是否可用" prop="Status">
-            <el-input v-model="siteDetail.Status"></el-input>
+            <!-- <el-input v-model="siteDetail.Status"></el-input> -->
+            <el-select v-model="siteDetail.Status" placeholder="请选择" class="inputSeletion">
+              <el-option label="是" value="1"></el-option>
+              <el-option label="否" value="0"></el-option>
+            </el-select>
           </el-form-item>
         </div>
       </el-card>

@@ -12,18 +12,20 @@
           <!-- <p  @click="jumpToTaskDetail(scope.$index, scope.row)" >{{ scope.row.Id}}</p> -->
         </template>
       </el-table-column>
+      <el-table-column label="标题" prop="Title"></el-table-column>
+
       <el-table-column label="创建时间" prop="CrateTime"></el-table-column>
       <el-table-column label="结束时间">
         <template
           slot-scope="scope"
         >{{scope.row.EndTime=="0001-01-01T00:00:00Z"? "null":scope.row.EndTime}}</template>
       </el-table-column>
+
       <el-table-column label="状态">
         <template slot-scope="scope">
           <div class="dots" :style="{'backgroundColor':scope.row.Status}"></div>
         </template>
       </el-table-column>
-      <el-table-column label="更新时间" prop="UpdateTime"></el-table-column>
       <el-table-column label="操作" filter-placement="bottom-end">
         <template slot-scope="scope">
           <el-button type="primary" @click="refresh(scope.row)" plain>刷新</el-button>
@@ -52,7 +54,7 @@ export default {
     return {
       taskList: [],
 
-      EndTime: "",
+      // EndTime: "",
       dotStatus: [],
       dotColor: "",
       currentPage4: 5,
@@ -61,26 +63,32 @@ export default {
   },
   mounted() {
     this.$api.getTaskList().then(res => {
-      // console.log(res);
+      console.log(res);
       this.total = res.count;
       this.taskList = res.data;
 
       // var time = res.data[0].UpdateTime;
       this.taskList.map(item => {
-        console.log(item.UpdateTime);
-        
-        var UpdateTime =  item.UpdateTime
-        var CrateTime =  item.CrateTime
+        // console.log(item.UpdateTime);
 
-       item.UpdateTime = CrateTime.substring(0, UpdateTime.indexOf("+"));
-       item.CrateTime =  UpdateTime.substring(0,  CrateTime.indexOf("+"));
-      
+        var UpdateTime = item.UpdateTime;
+        var CrateTime = item.CrateTime;
+        var EndTime = item.EndTime;
+
+        item.EndTime = EndTime.replace("T", " ");
+        item.UpdateTime = UpdateTime.replace("T", " ");
+        item.CrateTime = CrateTime.replace("T", " ");
+        
+        item.EndTime = EndTime.substring(0, EndTime.indexOf("+"));
+
+        item.UpdateTime = CrateTime.substring(0, UpdateTime.indexOf("+"));
+        item.CrateTime = UpdateTime.substring(0, CrateTime.indexOf("+"));
       });
-console.log(this.taskList);
+      console.log(this.taskList);
 
       // var newTime = time.substring(0, time.indexOf("+"));
       // console.log(newTime);
-//  console.log(res.data);
+      //  console.log(res.data);
       res.data.map(item => {
         switch (item.Status) {
           case "1":
@@ -128,9 +136,31 @@ console.log(this.taskList);
     },
     deleteWebsiteState(row) {
       var params = row.Id;
+      console.log(params);
 
-      // this.$axios.delete("http://192.168.31.234:8080/v2/website_state/"+ params ).then(data=>{console.log(data) ;window.location.reload()}
-      // )
+      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.$axios
+            .delete("http://192.168.31.234:8080//v2/website_state/" + params)
+            .then(data => {
+              console.log(data);
+              window.location.reload();
+            });
+          this.$message({
+            type: "success",
+            message: "删除成功!"
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
     },
 
     handleSizeChange(val) {

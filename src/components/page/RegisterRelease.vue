@@ -2,9 +2,29 @@
   <div class="register">
     <div class="header">
       <div class="funcChoose">
+        <!-- <el-tag v-for="(tag,index) in ruleForm" :key="index" closable >{{tag}}</el-tag> -->
+
+        <span style="fontSize:14px">一次性：</span>
+        <el-select
+          size="mini"
+          v-model="value"
+          clearable
+          placeholder="请选择"
+          class="seleterStyle"
+          @input="ifNeedDisposable"
+        >
+          <el-option
+            v-for="item in disposableOption"
+            :key="item.label"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
+
+        <!-- <span>一次性</span>
         <el-select v-model="value" placeholder="请选择" size="mini">
           <el-option v-for="item in cityOptions" :key="item" :label="item" :value="item"></el-option>
-        </el-select>
+        </el-select>-->
 
         <!-- <el-checkbox label="需要翻墙" @change="needVpn()" v-model="needVPN"></el-checkbox>
         <el-checkbox label="需要邮箱验证" @change="needEmail()" v-model="needEmails"></el-checkbox>
@@ -147,11 +167,20 @@
     ></el-pagination>
 
     <el-dialog title="提示" :visible.sync="showHint" width="30%" :before-close="handleClose">
-      <div ref="hint">
+    <div ref="hint">
         亲!全部成功的情况下,本次启动至少需要
-        <font color="#FF0000">{{hints}}</font> 个邮箱.
+        <font color="#FF0000">{{hints}}</font> 个邮箱
+        <div class="emailTitle">
+          <p style="width:135px">本次任务标题：</p>
+          <el-input
+            style="padding:20px 0"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入内容"
+            v-model="titleTextarea"
+          ></el-input>
+        </div>
       </div>
-
       <span slot="footer" class="dialog-footer">
         <el-button @click="showHint = false">取 消</el-button>
         <!-- <router-link to="/start" @click.native="showHint = false"> -->
@@ -190,7 +219,16 @@ Array.prototype.removeByValue = function(val) {
 export default {
   data() {
     return {
-      cityOptions: ["可以丢弃", "不可以丢弃"],
+      disposableOption: [
+        {
+          value: "1",
+          label: "是"
+        },
+        {
+          value: "0",
+          label: "否"
+        }
+      ],
 
       value: "",
       input: "",
@@ -231,7 +269,15 @@ export default {
       numberOfWebsites: 0,
       allProcess: "",
       lines: "",
-      requestEmail: false
+      requestEmail: false,
+      ruleForm: {
+        disposable: "",
+        region: "",
+        date1: ""
+      },
+
+      value: "",
+      titleTextarea: ""
     };
   },
   watch: {
@@ -241,6 +287,46 @@ export default {
   },
 
   methods: {
+    //是否丢弃筛选
+    ifNeedDisposable() {
+      console.log(this.value);
+      if (this.value) {
+        this.$axios
+          .get(
+            "http://192.168.31.234:8080/v2/website_use/?query=Disposable:" +
+              this.value
+          )
+          .then(res => {
+            this.allThreads = "";
+            this.searchList = res.data.data;
+
+            var webs = res.data.data;
+
+            this.numberOfWebsites = res.data.count;
+
+            this.searchList.map(item => {
+              // item.threads = this.allThreads;
+
+              this.$set(item, "threads", "");
+            });
+            console.log(res.data.data);
+          })
+          .catch(err => console.log(err));
+      } else {
+        this.$axios
+          .get("http://192.168.31.234:8080/v2/website_use/")
+          .then(res => {
+            console.log(res);
+            this.allThreads = "";
+
+            this.searchList = res.data.data;
+            this.searchList.map(item => {
+              this.$set(item, "threads", "");
+            });
+          })
+          .catch(err => console.log(err));
+      }
+    },
     // 全选所有网站
     seleteAllWebsites() {
       this.$refs.multipleTable.selection;
@@ -259,6 +345,7 @@ export default {
         message: "恭喜你，已经递交成功",
         type: "success"
       });
+      this.$router.push("/task");
     },
     startTaskAndChangeEmail() {
       this.requestEmail = false;
@@ -270,6 +357,11 @@ export default {
         this.$axios
           .post("http://192.168.31.234:8080/v2/start/", this.Projects)
           .then(res => console.log(res));
+        this.$message({
+          message: "恭喜你，已经递交成功",
+          type: "success"
+        });
+        this.$router.push("/task");
       } else {
         this.$axios
           .post("http://192.168.31.234:8080/v2/start/", this.Projects)
@@ -279,6 +371,7 @@ export default {
         message: "恭喜你，已经递交成功",
         type: "success"
       });
+      this.$router.push("/task");
     },
     // 翻墙筛选
     // needVpn() {
@@ -450,9 +543,8 @@ export default {
     //   console.log(this.searchList);
     // },
     allThreadsNum(val) {
-      console.log(this.searchList);
-
       this.searchList.map(item => (item.threads = Number(val)));
+      console.log(this.searchList);
     },
     processesNum(index, row) {
       console.log(row);
@@ -554,6 +646,10 @@ export default {
           item => item.lines != "" && item.threads != ""
         );
         if (isEmpty) {
+          this.titleTextarea = `网站数量:${
+            seletedSites.length
+          } - 注册和发布文章 - ${new Date().toLocaleDateString()}`;
+
           var list = seletedSites.map(item => {
             return {
               Id: item.Id,
@@ -562,6 +658,8 @@ export default {
               CountAll: item.threads
             };
           });
+          this.Projects.Title = this.titleTextarea;
+
           this.Projects.Projects = list;
           console.log(this.Projects);
           this.$axios
@@ -585,16 +683,19 @@ export default {
     deletedWebsites(rows) {
       //暂未调用删除接口
       var arr2 = this.siteList;
-      var arr1 = this.$refs.multipleTable.selection;
-
-      // this.$axios.delete("http://192.168.31.234:8080/v2/website_use",{2}).then(data=>console.log(data)
-      // )
+      var deletedOptons = this.$refs.multipleTable.selection;
+      var deleteList = deletedOptons.map(item => item.Id);
+      console.log(deleteList);
+      for (let i = 0; i < deleteList.length; i++) {
+        // this.$axios.delete("http://192.168.31.234:8080/v2/website_use"+deleteList[i]).then(data=>console.log(data)
+        // )
+      }
 
       this.searchList = arr2.filter(
-        item => !arr1.some(ele => ele.Url === item.Url)
+        item => !deletedOptons.some(ele => ele.Url === item.Url)
       );
       this.visible = false;
-      console.log(this.searchList);
+      // console.log(this.searchList);
     }
   },
   mounted() {
@@ -609,7 +710,8 @@ export default {
       for (let i in webs) {
         // console.log(webs[i]);
         // webs[i].lines = "";
-        webs[i].threads = "";
+        // webs[i].threads = "";
+        this.$set(webs[i], "threads", "");
       }
       this.siteList = webs;
 
@@ -648,5 +750,8 @@ export default {
   /* justify-items: center; */
   justify-content: center;
   margin-top: 30px;
+}
+.seleterStyle {
+  width: 100px;
 }
 </style>

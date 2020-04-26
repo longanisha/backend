@@ -73,7 +73,7 @@
               @input="allThreadsNum"
               v-model.number="allThreads"
               placeholder="请输入总数量"
-             class="inputSize"
+              class="inputSize"
             />
           </div>
         </template>
@@ -114,7 +114,7 @@
       </el-table-column>-->
     </el-table>
     <div style="margin-top: 20px">
-   <el-button @click="seletedWebsites()" size="mini">递交网站</el-button>
+      <el-button @click="seletedWebsites()" size="mini">递交网站</el-button>
 
       <el-popover placement="top" width="160" v-model="visible" size="mini">
         <p>是否确定删除所选网站</p>
@@ -126,7 +126,12 @@
       </el-popover>
 
       <!-- <el-button @click="deletedWebsites()" type="danger">删除选中网站</el-button> -->
-      <el-button type="primary" size="mini" class="btnStyle" @click="seleteAllWebsites()">全选{{numberOfWebsites}}个网站</el-button>
+      <el-button
+        type="primary"
+        size="mini"
+        class="btnStyle"
+        @click="seleteAllWebsites()"
+      >全选{{numberOfWebsites}}个网站</el-button>
       <el-button @click="toggleSelection()" size="mini" plain>取消选择</el-button>
     </div>
     <el-pagination
@@ -140,9 +145,19 @@
     ></el-pagination>
 
     <el-dialog title="提示" :visible.sync="showHint" width="30%" :before-close="handleClose">
-      <div ref="hint">
+       <div ref="hint">
         亲!全部成功的情况下,本次启动至少需要
-        <font color="#FF0000">{{hints}}</font> 个邮箱.
+        <font color="#FF0000">{{hints}}</font> 个邮箱
+        <div class="emailTitle">
+          <p style="width:135px">本次任务标题：</p>
+          <el-input
+            style="padding:20px 0"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入内容"
+            v-model="titleTextarea"
+          ></el-input>
+        </div>
       </div>
 
       <span slot="footer" class="dialog-footer">
@@ -223,7 +238,8 @@ export default {
       numberOfWebsites: 0,
       allProcess: "",
       lines: "",
-      requestEmail: false
+      requestEmail: false,
+      titleTextarea: ""
     };
   },
   watch: {
@@ -233,13 +249,11 @@ export default {
   },
 
   methods: {
-// 全选所有网站
-seleteAllWebsites(){
-  this.$refs.multipleTable.selection
-  console.log( this.$refs.multipleTable.selection);
-  
-},
-
+    // 全选所有网站
+    seleteAllWebsites() {
+      this.$refs.multipleTable.selection;
+      console.log(this.$refs.multipleTable.selection);
+    },
 
     //  开启任务
     startTask() {
@@ -253,6 +267,7 @@ seleteAllWebsites(){
         message: "恭喜你，已经递交成功",
         type: "success"
       });
+      this.$router.push("/task");
     },
     startTaskAndChangeEmail() {
       this.requestEmail = false;
@@ -264,6 +279,11 @@ seleteAllWebsites(){
         this.$axios
           .post("http://192.168.31.234:8080/v2/start/", this.Projects)
           .then(res => console.log(res));
+        this.$message({
+          message: "恭喜你，已经递交成功",
+          type: "success"
+        });
+        this.$router.push("/task");
       } else {
         this.$axios
           .post("http://192.168.31.234:8080/v2/start/", this.Projects)
@@ -273,6 +293,7 @@ seleteAllWebsites(){
         message: "恭喜你，已经递交成功",
         type: "success"
       });
+      this.$router.push("/task");
     },
     // 翻墙筛选
     // needVpn() {
@@ -538,7 +559,6 @@ seleteAllWebsites(){
     handleSelectionChange(val) {
       this.multipleSelection = val;
       console.log(val);
-      
     },
     seletedWebsites(rows) {
       var seletedSites = this.$refs.multipleTable.selection;
@@ -549,6 +569,10 @@ seleteAllWebsites(){
           item => item.lines != "" && item.threads != ""
         );
         if (isEmpty) {
+          this.titleTextarea = `网站数量:${
+            seletedSites.length
+          } - 发布文章 - ${new Date().toLocaleDateString()}`;
+
           var list = seletedSites.map(item => {
             return {
               Id: item.Id,
@@ -557,6 +581,8 @@ seleteAllWebsites(){
               CountAll: item.threads
             };
           });
+          this.Projects.Title = this.titleTextarea;
+
           this.Projects.Projects = list;
           console.log(this.Projects);
           this.$axios
@@ -580,16 +606,19 @@ seleteAllWebsites(){
     deletedWebsites(rows) {
       //暂未调用删除接口
       var arr2 = this.siteList;
-      var arr1 = this.$refs.multipleTable.selection;
-
-      // this.$axios.delete("http://192.168.31.234:8080/v2/website_use",{2}).then(data=>console.log(data)
-      // )
+      var deletedOptons = this.$refs.multipleTable.selection;
+      var deleteList = deletedOptons.map(item => item.Id);
+      console.log(deleteList);
+      for (let i = 0; i < deleteList.length; i++) {
+        // this.$axios.delete("http://192.168.31.234:8080/v2/website_use"+deleteList[i]).then(data=>console.log(data)
+        // )
+      }
 
       this.searchList = arr2.filter(
-        item => !arr1.some(ele => ele.Url === item.Url)
+        item => !deletedOptons.some(ele => ele.Url === item.Url)
       );
       this.visible = false;
-      console.log(this.searchList);
+      // console.log(this.searchList);
     }
   },
   mounted() {
@@ -604,7 +633,8 @@ seleteAllWebsites(){
       for (let i in webs) {
         // console.log(webs[i]);
         // webs[i].lines = "";
-        webs[i].threads = "";
+        // webs[i].threads = "";
+        this.$set(webs[i], "threads", "");
       }
       this.siteList = webs;
 
